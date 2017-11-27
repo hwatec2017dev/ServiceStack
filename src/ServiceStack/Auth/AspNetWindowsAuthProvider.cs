@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
 using System.Web;
+using ServiceStack.Configuration;
 using ServiceStack.Host.AspNet;
 using ServiceStack.Web;
 
@@ -15,14 +16,14 @@ namespace ServiceStack.Auth
         public static string Name = AuthenticateService.WindowsAuthProvider;
         public static string Realm = "/auth/" + AuthenticateService.WindowsAuthProvider;
 
-        public AspNetWindowsAuthProvider(IAppHost appHost)
+        public AspNetWindowsAuthProvider(IAppSettings appSettings) : base(appSettings, Realm, Name)
         {
             Provider = Name;
             AuthRealm = Realm;
 
             AllRoles = new List<string>();
             LimitAccessToRoles = new List<string>();
-
+            var appHost = HostContext.AppHost;
             if (!(appHost is AppHostBase))
             {
                 throw new NotSupportedException(

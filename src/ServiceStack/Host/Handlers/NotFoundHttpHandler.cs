@@ -14,7 +14,7 @@ namespace ServiceStack.Host.Handlers
         public string DefaultRootFileName { get; set; }
         public string DefaultHandler { get; set; }
 
-        public override Task ProcessRequestAsync(IRequest request, IResponse response, string operationName)
+        public override void ProcessRequest(IRequest request, IResponse response, string operationName)
         {
             HostContext.AppHost.OnLogError(typeof(NotFoundHttpHandler),
                 $"{request.UserHostAddress} Request not found: {request.RawUrl}");
@@ -50,7 +50,7 @@ namespace ServiceStack.Host.Handlers
                 response.StatusDescription = responseStatus.ErrorCode;
 
             var text = StringBuilderCache.ReturnAndFree(sb);
-            return response.EndHttpHandlerRequestAsync(skipClose: true, afterHeaders: r => r.WriteAsync(text));
+            response.EndHttpHandlerRequest(skipClose: true, afterHeaders: r => r.WriteAsync(text));
         }
 
         public override bool IsReusable => true;

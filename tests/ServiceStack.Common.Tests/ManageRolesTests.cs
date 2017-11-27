@@ -159,7 +159,7 @@ namespace ServiceStack.Common.Tests
             }
         }
 
-        [Test]
+        [Test, Ignore("DynamoDB")]
         public void Can_assign_roles_that_persist_to_UserAuthRole_table_in_DynamoDb()
         {
             using (var appHost = new BasicAppHost

@@ -114,6 +114,7 @@ namespace ServiceStack.Server.Tests.Auth
         }
     }
 
+    [Ignore("DynamoDB")]
     public class DynamoDbAuthRepoStatelessAuthTests : StatelessAuthTests
     {
         public static AmazonDynamoDBClient CreateDynamoDBClient()
@@ -166,7 +167,7 @@ namespace ServiceStack.Server.Tests.Auth
     }
 
 #if !NETCORE_SUPPORT
-    [Ignore("Requires MongoDB Dependency")]
+    //[Ignore("Requires MongoDB Dependency")]
     public class MongoDbAuthRepoStatelessAuthTests : StatelessAuthTests
     {
         protected override ServiceStackHost CreateAppHost()

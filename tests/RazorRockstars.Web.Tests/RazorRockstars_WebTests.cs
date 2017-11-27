@@ -96,7 +96,7 @@ namespace RazorRockstars.Web.Tests
 			});
 		}
 
-        public static string Host = "http://localhost:1338";
+        public static string Host = "http://localhost:1337";
 
 		static string ViewRockstars = "<!--view:Rockstars.cshtml-->";
         static string ViewRockstars2 = "<!--view:Rockstars2.cshtml-->";

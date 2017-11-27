@@ -52,6 +52,7 @@ namespace ServiceStack.OpenApi.Tests.Host
             {
                 DebugMode = true,
                 Return204NoContentForEmptyResponse = true,
+                StrictMode = false
             });
 
             container.Register<IDbConnectionFactory>(c => new OrmLiteConnectionFactory(

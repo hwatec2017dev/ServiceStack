@@ -8,6 +8,7 @@ using ServiceStack;
 using ServiceStack.Api.Swagger;
 using ServiceStack.Data;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Formats;
 using ServiceStack.MsgPack;
 using ServiceStack.OrmLite;
 using ServiceStack.Razor;
@@ -27,6 +28,7 @@ namespace RazorRockstars.Web
 
         public override void Configure(Container container)
         {
+            Plugins.Add(new MarkdownFormat());
             Plugins.Add(new RazorFormat());
             Plugins.Add(new MsgPackFormat());
             Plugins.Add(new SwaggerFeature { UseBootstrapTheme = true });

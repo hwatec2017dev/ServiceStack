@@ -51,6 +51,7 @@ namespace ServiceStack.AuthWeb.Tests
 
         public override void Configure(Container container)
         {
+            Plugins.Add(new MiniProfilerFeature());
             Plugins.Add(new RazorFormat());
             Plugins.Add(new ServerEventsFeature
             {
@@ -125,10 +126,10 @@ namespace ServiceStack.AuthWeb.Tests
             Plugins.Add(new AuthFeature(
                 () => new CustomUserSession(), //Use your own typed Custom UserSession type
                 new IAuthProvider[] {
-                    //new AspNetWindowsAuthProvider(this) {
-                    //    LoadUserAuthFilter = LoadUserAuthInfo,
-                    //    AllowAllWindowsAuthUsers = true
-                    //}, 
+                    new AspNetWindowsAuthProvider(appSettings) {
+                        LoadUserAuthFilter = LoadUserAuthInfo,
+                        AllowAllWindowsAuthUsers = true
+                    },
                     new CredentialsAuthProvider {  //HTML Form post of UserName/Password credentials
                         SkipPasswordVerificationForInProcessRequests = true,
                         //CustomValidationFilter = authCtx => 
@@ -141,7 +142,7 @@ namespace ServiceStack.AuthWeb.Tests
                     new TwitterAuthProvider(appSettings),       //Sign-in with Twitter
                     new FacebookAuthProvider(appSettings),      //Sign-in with Facebook
                     new DigestAuthProvider(appSettings),        //Sign-in with Digest Auth
-                    new BasicAuthProvider(),                    //Sign-in with Basic Auth
+                    new BasicAuthProvider(appSettings),         //Sign-in with Basic Auth
                     new GoogleOpenIdOAuthProvider(appSettings), //Sign-in with Google OpenId
                     new YahooOpenIdOAuthProvider(appSettings),  //Sign-in with Yahoo OpenId
                     new OpenIdOAuthProvider(appSettings),       //Sign-in with Custom OpenId

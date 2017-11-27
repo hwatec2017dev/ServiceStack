@@ -175,8 +175,8 @@ namespace ServiceStack.Common.Tests.Messaging
     [TestFixture]
     public abstract class MqServerAppHostTests
     {
-        protected const string ListeningOn = "http://*:1337/";
-        public const string Host = "http://localhost:1337";
+        protected const string ListeningOn = "http://*:1339/";
+        public const string Host = "http://localhost:1339";
         private const string BaseUri = Host + "/";
 
         protected ServiceStackHost appHost;

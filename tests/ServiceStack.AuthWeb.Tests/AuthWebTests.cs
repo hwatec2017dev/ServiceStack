@@ -13,7 +13,10 @@ namespace ServiceStack.AuthWeb.Tests
         [Test]
         public void Can_authenticate_with_WindowsAuth()
         {
-            var client = new JsonServiceClient(BaseUri);
+            var client = new JsonServiceClient(BaseUri)
+            {
+                Credentials = CredentialCache.DefaultCredentials
+            };
 
             var response = client.Get(new RequiresAuth { Name = "Haz Access!" });
 
@@ -21,12 +24,12 @@ namespace ServiceStack.AuthWeb.Tests
         }
 
         [Test]
-        public void Can_authenticate_with_DefaultCredentials()
+        public void Can_authenticate_with__HTTP_Basic_Credentials()
         {
             var client = new JsonServiceClient(BaseUri)
             {
-                Credentials = CredentialCache.DefaultCredentials,
-                //Credentials = new NetworkCredential("mythz", "invalid", "macbook")
+                UserName = "demis.bellot@gmail.com",
+                Password = "test",
             };
 
             var response = client.Get(new RequiresAuth { Name = "Haz Access!" });
@@ -41,6 +44,7 @@ namespace ServiceStack.AuthWeb.Tests
 
             var response = client.Send(new Authenticate
             {
+                provider = "credentials",
                 UserName = "demis.bellot@gmail.com",
                 Password = "test",
                 Meta = new Dictionary<string, string> { { "custom", "metadata" } }
