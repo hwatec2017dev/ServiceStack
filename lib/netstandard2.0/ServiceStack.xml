@@ -48,6 +48,12 @@
             Enable the authentication feature and configure the AuthService.
             </summary>
         </member>
+        <member name="P:ServiceStack.AuthFeature.CreateDigestAuthHashes">
+            <summary>
+            Whether to Create Digest Auth MD5 Hash when Creating/Updating Users.
+            Defaults to only creating Digest Auth when DigestAuthProvider is registered.
+            </summary>
+        </member>
         <member name="P:ServiceStack.AuthFeature.SaveUserNamesInLowerCase">
             <summary>
             Should UserName or Emails be saved in AuthRepository in LowerCase
@@ -135,6 +141,21 @@
             <param name="requestDto"></param>
             <returns>Response DTO; non-null will short-circuit execution and return that response</returns>
         </member>
+        <member name="M:ServiceStack.Auth.AuthenticateService.GetAuthProviders(System.String)">
+            <summary>
+            Get AuthProviders Registered in AuthFeature Plugin.
+            </summary>
+            <param name="provider">specific provider, or null for all providers</param>
+            <returns></returns>
+            <exception cref="T:System.Exception"></exception>
+        </member>
+        <member name="M:ServiceStack.Auth.AuthenticateService.GetAuthProvider(System.String)">
+            <summary>
+            Get specific AuthProvider
+            </summary>
+            <param name="provider"></param>
+            <returns></returns>
+        </member>
         <member name="M:ServiceStack.Auth.AuthenticateService.Authenticate(ServiceStack.Authenticate)">
             <summary>
             Public API entry point to authenticate via code
@@ -171,12 +192,6 @@
             <param name="service"></param>
             <param name="request"></param>
             <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Auth.AuthProvider.SaveUserAuth(ServiceStack.IServiceBase,ServiceStack.Auth.IAuthSession,ServiceStack.Auth.IAuthRepository,ServiceStack.Auth.IAuthTokens)">
-            <summary>
-            Saves the Auth Tokens for this request. Called in OnAuthenticated(). 
-            Overrideable, the default behaviour is to call IUserAuthRepository.CreateOrMergeAuthSession().
-            </summary>
         </member>
         <member name="T:ServiceStack.Auth.FacebookAuthProvider">
             <summary>
@@ -325,7 +340,7 @@
             Allow verification using multiple Auth keys
             </summary>
         </member>
-        <member name="F:ServiceStack.Auth.JwtAuthProviderReader.privateKey">
+        <member name="F:ServiceStack.Auth.JwtAuthProviderReader._privateKey">
             <summary>
             The RSA Private Key used to Sign the JWT Token when RSA is used
             </summary>
@@ -412,6 +427,45 @@
               NB: They claim they use OAuth 2.0, but they in fact don't. 
               http://apiok.ru/wiki/display/api/Authorization+OAuth+2.0
             </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.Pbkdf2Provider">
+            <summary>
+            Allow utilizing an alternative PBKDF2 implementation.
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.Pbkdf2Provider.DeriveKey">
+            <summary>
+            The PBKDF2 strategy PasswordHasher implementation that's used for hashing PBKDF2 passwords.
+            </summary>
+        </member>
+        <member name="T:ServiceStack.Auth.PasswordHasher">
+            <summary>
+            The Password Hasher provider used to hash users passwords which uses the same algorithm used by ASP.NET Identity v3:
+            PBKDF2 with HMAC-SHA256, 128-bit salt, 256-bit subkey, 10000 iterations.
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.PasswordHasher.IterationCount">
+            <summary>
+            Gets the number of iterations used when hashing passwords using PBKDF2. Default is 10,000.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Auth.PasswordHasher.#ctor(System.Int32)">
+            <summary>
+            The number of iterations used when hashing passwords using PBKDF2. Default is 10,000.
+            </summary>
+        </member>
+        <member name="P:ServiceStack.Auth.PasswordHasher.Version">
+            <summary>
+            The Format Version specifier for this PasswordHasher embedded as the first byte in password hashes.
+            </summary>
+        </member>
+        <member name="M:ServiceStack.Auth.PasswordHasher.HashPassword(System.String)">
+            <summary>
+            Returns a hashed representation of the supplied <paramref name="password"/> for the specified <paramref name="user"/>.
+            </summary>
+            <param name="user">The user whose password is to be hashed.</param>
+            <param name="password">The password to hash.</param>
+            <returns>A hashed representation of the supplied <paramref name="password"/> for the specified <paramref name="user"/>.</returns>
         </member>
         <member name="M:ServiceStack.Auth.RegisterService.Put(ServiceStack.Register)">
             <summary>
@@ -4246,9 +4300,20 @@
              and precision of 2 and 5 respectively.
              </summary>
         </member>
-        <member name="M:ServiceStack.Formats.MarkdownFormat.SerializeToStreamAsync(ServiceStack.Web.IRequest,System.Object,System.IO.Stream)">
+        <member name="P:ServiceStack.HostConfig.UseSaltedHash">
             <summary>
-            Render Markdown for text/markdown and text/plain ContentTypes
+            If enabled reverts to persist password hashes using the original SHA256 SaltedHash implementation. 
+            By default ServiceStack uses the more secure ASP.NET Identity v3 PBKDF2 with HMAC-SHA256 implementation.
+            
+            New Users will have their passwords persisted with the specified implementation, likewise existing users will have their passwords re-hased
+            to use the current registered IPasswordHasher.
+            </summary>
+        </member>
+        <member name="P:ServiceStack.HostConfig.FallbackPasswordHashers">
+            <summary>
+            Older Password Hashers that were previously used to hash passwords. Failed password matches check to see if the password was hashed with 
+            any of the registered FallbackPasswordHashers, if true the password attempt will succeed and password will get re-hashed with 
+            the current registered IPasswordHasher.
             </summary>
         </member>
         <member name="P:ServiceStack.HostContext.VirtualFiles">
@@ -4337,13 +4402,11 @@
             Provide for quick lookups based on hashes that can be determined from a request url
             </summary>
         </member>
-        <member name="M:ServiceStack.Host.RestPath.IsMatch(System.String,System.String[])">
+        <member name="M:ServiceStack.Host.RestPath.IsMatch(ServiceStack.Web.IHttpRequest)">
             <summary>
             For performance withPathInfoParts should already be a lower case string
             to minimize redundant matching operations.
             </summary>
-            <param name="httpMethod"></param>
-            <param name="withPathInfoParts"></param>
             <returns></returns>
         </member>
         <member name="M:ServiceStack.Host.RestPath.IsMatch(System.String,System.String[],System.Int32@)">
@@ -4354,6 +4417,15 @@
             <param name="httpMethod"></param>
             <param name="withPathInfoParts"></param>
             <param name="wildcardMatchCount"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ServiceStack.Host.ServiceController.GetRestPathForRequest(System.String,System.String,ServiceStack.Web.IHttpRequest)">
+            <summary>
+            Get Best Matching Route. 
+            </summary>
+            <param name="httpMethod"></param>
+            <param name="pathInfo"></param>
+            <param name="httpReq">If not null, ensures any Route matches any [Route(Matches)]</param>
             <returns></returns>
         </member>
         <member name="M:ServiceStack.Host.ServiceController.ExecuteMessage(ServiceStack.Messaging.IMessage)">
@@ -4390,6 +4462,11 @@
             </summary>
             <param name="type">The type.</param>
             <returns></returns>
+        </member>
+        <member name="T:ServiceStack.HotReloadFeature">
+            <summary>
+            Back-end Service used by /js/hot-fileloader.js to detect file changes in /wwwroot and auto reload page.
+            </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "T:ServiceStack.Html.HtmlCompressor" -->
         <member name="F:ServiceStack.Html.HtmlCompressor.PHP_TAG_PATTERN">
@@ -4561,24 +4638,6 @@
             Returns total size of inline event handlers (<code>onclick</code>, etc)
             
             @return total size of inline event handlers, in bytes
-        </member>
-        <member name="M:ServiceStack.Html.ScopeStorageDictionary.#ctor(System.Collections.Generic.IDictionary{System.Object,System.Object},System.Collections.Generic.IDictionary{System.Object,System.Object})">
-            <summary>
-            Initializes a new instance of the <see cref="T:ServiceStack.Html.ScopeStorageDictionary"/> class.
-            </summary>
-            <param name="baseScope">The base scope.</param>
-            <param name="backingStore">
-            The dictionary to use as a storage. Since the dictionary would be used as-is, we expect the implementer to 
-            use the same key-value comparison logic as we do here.
-            </param>
-        </member>
-        <member name="T:ServiceStack.Html.ScopeStorageComparer">
-            <summary>
-            Custom comparer for the context dictionaries
-            The comparer treats strings as a special case, performing case insesitive comparison. 
-            This guaratees that we remain consistent throughout the chain of contexts since PageData dictionary 
-            behaves in this manner.
-            </summary>
         </member>
         <member name="M:ServiceStack.HttpExtensions.EndRequest(ServiceStack.Web.IResponse,System.Boolean)">
             <summary>
@@ -4972,6 +5031,12 @@
             The AppHost AppSettings. Defaults to App or Web.config appSettings.
             </summary>
         </member>
+        <member name="M:ServiceStack.IAppHost.GetRuntimeConfig``1(ServiceStack.Web.IRequest,System.String,``0)">
+            <summary>
+            Allow specific configuration to be overridden at runtime in multi-tenancy Applications
+            by overriding GetRuntimeConfig in your AppHost
+            </summary>
+        </member>
         <member name="M:ServiceStack.IAppHost.RegisterService(System.Type,System.String[])">
             <summary>
             Register an Adhoc web service on Startup
@@ -5077,83 +5142,6 @@
             <typeparam name="T"></typeparam>
             <returns></returns>
         </member>
-        <member name="P:ServiceStack.Markdown.MarkdownViewBase.ViewEngine">
-            <summary>
-            Reference to MarkdownViewEngine
-            </summary>
-        </member>
-        <member name="P:ServiceStack.Markdown.MarkdownViewBase.AppHost">
-            <summary>
-            The AppHost so you can access configuration and resolve dependencies, etc.
-            </summary>
-        </member>
-        <member name="P:ServiceStack.Markdown.MarkdownViewBase.MarkdownPage">
-            <summary>
-            This precompiled Markdown page with Metadata
-            </summary>
-        </member>
-        <member name="P:ServiceStack.Markdown.MarkdownViewBase.Html">
-            <summary>
-            ASP.NET MVC's HtmlHelper
-            </summary>
-        </member>
-        <member name="P:ServiceStack.Markdown.MarkdownViewBase.ScopeArgs">
-            <summary>
-            All variables passed to and created by your page. 
-            The Response DTO is stored and accessible via the 'Model' variable.
-             
-            All variables and outputs created are stored in ScopeArgs which is what's available
-            to your website template. The Generated page is stored in the 'Body' variable.
-            </summary>
-        </member>
-        <member name="P:ServiceStack.Markdown.MarkdownViewBase.RenderHtml">
-            <summary>
-            Whether HTML or Markdown output is requested
-            </summary>
-        </member>
-        <member name="P:ServiceStack.Markdown.MarkdownViewBase.Model">
-            <summary>
-            The Response DTO
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Markdown.MarkdownViewBase.GetHtmlHelper">
-            <summary>
-            Ensure the same instance is used for subclasses
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Markdown.MarkdownViewBase.InitHelpers">
-            <summary>
-            Called before page is executed
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Markdown.MarkdownViewBase.OnLoad">
-            <summary>
-            Called after page is executed but before it's merged with the 
-            website template if any.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.Markdown.MarkdownViewBase.Raw(System.String)">
-            <summary>
-            Don't HTML encode safe output
-            </summary>
-            <param name="content"></param>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Markdown.MarkdownViewBase.Partial(System.String,System.Object)">
-            <summary>
-            Return the output of a different view with the specified name 
-            using the supplied model
-            </summary>
-            <param name="viewName"></param>
-            <param name="model"></param>
-            <returns></returns>
-        </member>
-        <member name="M:ServiceStack.Markdown.MarkdownViewBase.Get``1">
-            <summary>
-            Resolve registered Assemblies
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:ServiceStack.Messaging.IMessageHandlerFactory">
             <summary>
             Encapsulates creating a new message handler
@@ -5170,151 +5158,6 @@
             <summary>
             Changes the links for the servicestack/metadata page
             </summary>
-        </member>
-        <member name="T:ServiceStack.MiniProfiler.Helpers.ExtensionMethods">
-            <summary>
-            Common extension methods to use only in this project
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Helpers.ExtensionMethods.IsNullOrWhiteSpace(System.String)">
-            <summary>
-            Answers true if this String is either null or empty.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Helpers.ExtensionMethods.HasValue(System.String)">
-            <summary>
-            Answers true if this String is neither null or empty.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Helpers.ExtensionMethods.EnsureTrailingSlash(System.String)">
-            <summary>
-            Removes trailing / characters from a path and leaves just one
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Helpers.ExtensionMethods.RemoveLeadingSlash(System.String)">
-            <summary>
-            Removes any leading / characters from a path
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Helpers.ExtensionMethods.RemoveTrailingSlash(System.String)">
-            <summary>
-            Removes any leading / characters from a path
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Helpers.ExtensionMethods.ToJson(System.Object)">
-            <summary>
-            Serializes <paramref name="o"/> to a json string.
-            </summary>
-        </member>
-        <member name="T:ServiceStack.MiniProfiler.SqlTimingParameter">
-            <summary>
-            Information about a DbParameter used in the sql statement profiled by SqlTiming.
-            </summary>
-        </member>
-        <member name="P:ServiceStack.MiniProfiler.SqlTimingParameter.ParentSqlTimingId">
-            <summary>
-            Which SqlTiming this Parameter was executed with.
-            </summary>
-        </member>
-        <member name="P:ServiceStack.MiniProfiler.SqlTimingParameter.Name">
-            <summary>
-            Parameter name, e.g. "@routeName"
-            </summary>
-        </member>
-        <member name="P:ServiceStack.MiniProfiler.SqlTimingParameter.Value">
-            <summary>
-            The value submitted to the database.
-            </summary>
-        </member>
-        <member name="P:ServiceStack.MiniProfiler.SqlTimingParameter.DbType">
-            <summary>
-            System.Data.DbType, e.g. "String", "Bit"
-            </summary>
-        </member>
-        <member name="P:ServiceStack.MiniProfiler.SqlTimingParameter.Size">
-            <summary>
-            How large the type is, e.g. for string, size could be 4000
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.SqlTimingParameter.Equals(System.Object)">
-            <summary>
-            Returns true if this has the same parent <see cref="!:SqlTiming.Id"/>, <see cref="P:ServiceStack.MiniProfiler.SqlTimingParameter.Name"/> and <see cref="P:ServiceStack.MiniProfiler.SqlTimingParameter.Value"/> as <paramref name="obj"/>.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.SqlTimingParameter.GetHashCode">
-            <summary>
-            Returns the XOR of certain properties.
-            </summary>
-        </member>
-        <member name="T:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase">
-            <summary>
-            Understands how to save MiniProfiler results to a MSSQL database, allowing more permanent storage and
-            querying of slow results.
-            </summary>
-        </member>
-        <member name="P:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase.ConnectionString">
-            <summary>
-            How we connect to the database used to save/load MiniProfiler results.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase.#ctor(System.String)">
-            <summary>
-            Returns a new SqlServerDatabaseStorage object that will insert into the database identified by connectionString.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase.Save(ServiceStack.MiniProfiler.Profiler)">
-            <summary>
-            Saves 'profiler' to a database under its <see cref="!:Profiler.Id"/>.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase.Load(System.Guid)">
-            <summary>
-            Returns the MiniProfiler identified by 'id' from the database or null when no MiniProfiler exists under that 'id'.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase.GetUnviewedIds(System.String)">
-            <summary>
-            Returns a list of <see cref="!:Profiler.Id"/>s that haven't been seen by <paramref name="user"/>.
-            </summary>
-            <param name="user">User identified by the current <see cref="!:Profiler.Settings.UserProvider"/>.</param>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase.GetConnection">
-            <summary>
-            Returns a DbConnection for your specific provider.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.DatabaseStorageBase.GetOpenConnection">
-            <summary>
-            Returns a DbConnection already opened for execution.
-            </summary>
-        </member>
-        <member name="T:ServiceStack.MiniProfiler.Storage.IStorage">
-            <summary>
-            Provides saving and loading <see cref="T:ServiceStack.MiniProfiler.Profiler"/>s to a storage medium.
-            </summary>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.IStorage.Save(ServiceStack.MiniProfiler.Profiler)">
-            <summary>
-            Stores <paramref name="profiler"/> under its <see cref="!:Profiler.Id"/>.
-            </summary>
-            <param name="profiler">The results of a profiling session.</param>
-            <remarks>
-            Should also ensure the profiler is stored as being unviewed by its profiling <see cref="!:Profiler.User"/>.
-            </remarks>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.IStorage.Load(System.Guid)">
-            <summary>
-            Returns a <see cref="T:ServiceStack.MiniProfiler.Profiler"/> from storage based on <paramref name="id"/>, which should map to <see cref="!:Profiler.Id"/>.
-            </summary>
-            <remarks>
-            Should also update that the resulting profiler has been marked as viewed by its profiling <see cref="!:Profiler.User"/>.
-            </remarks>
-        </member>
-        <member name="M:ServiceStack.MiniProfiler.Storage.IStorage.GetUnviewedIds(System.String)">
-            <summary>
-            Returns a list of <see cref="!:Profiler.Id"/>s that haven't been seen by <paramref name="user"/>.
-            </summary>
-            <param name="user">User identified by the current <see cref="!:Profiler.Settings.UserProvider"/>.</param>
         </member>
         <member name="M:ServiceStack.Platform.GetParseMethod(System.Type)">
             <summary>
@@ -5744,11 +5587,6 @@
             (warning, manualy triggering this might lead to unwanted disposing of all request related objects and services.)
             </summary>
         </member>
-        <member name="F:ServiceStack.ServiceExtensions.DefaultCache">
-            <summary>
-            If they don't have an ICacheClient configured use an In Memory one.
-            </summary>
-        </member>
         <member name="M:ServiceStack.ServiceRoutesExtensions.AddFromAssembly(ServiceStack.Web.IServiceRoutes,System.Reflection.Assembly[])">
              <summary>
                  Scans the supplied Assemblies to infer REST paths and HTTP verbs.
@@ -5957,7 +5795,7 @@
         <member name="M:ServiceStack.ServiceStackHost.GetDbConnection(ServiceStack.Web.IRequest)">
             <summary>
             Gets IDbConnection Checks if DbInfo is seat in RequestContext.
-            See multitenancy: https://github.com/ServiceStack/ServiceStack/wiki/Multitenancy
+            See multitenancy: http://docs.servicestack.net/multitenancy
             Called by itself, <see cref="T:ServiceStack.Service"></see> and <see cref="!:ServiceStack.Razor.ViewPageBase"></see>
             </summary>
             <param name="req">Provided by services and pageView, can be helpfull when overriding this method</param>
@@ -5970,6 +5808,11 @@
             </summary>
             <param name="req">Provided by services and pageView, can be helpfull when overriding this method</param>
             <returns></returns>
+        </member>
+        <member name="F:ServiceStack.ServiceStackHost.DefaultCache">
+            <summary>
+            If they don't have an ICacheClient configured use an In Memory one.
+            </summary>
         </member>
         <member name="M:ServiceStack.ServiceStackHost.GetCacheClient(ServiceStack.Web.IRequest)">
             <summary>
@@ -6765,352 +6608,6 @@
             <summary>
             Specifies the owner of instances created from this registration. Default 
             owner is <see cref="F:Funq.Owner.Container"/>.
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.MarkdownOptions.AutoHyperlink">
-            <summary>
-            when true, (most) bare plain URLs are auto-hyperlinked  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.MarkdownOptions.AutoNewlines">
-            <summary>
-            when true, RETURN becomes a literal newline  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.MarkdownOptions.EmptyElementSuffix">
-            <summary>
-            use ">" for HTML output, or " />" for XHTML output
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.MarkdownOptions.EncodeProblemUrlCharacters">
-            <summary>
-            when true, problematic URL characters like [, ], (, and so forth will be encoded 
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.MarkdownOptions.LinkEmails">
-            <summary>
-            when false, email addresses will never be auto-linked  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.MarkdownOptions.StrictBoldItalic">
-            <summary>
-            when true, bold and italic require non-word characters on either side  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="T:MarkdownSharp.Markdown">
-            <summary>
-            Markdown is a text-to-HTML conversion tool for web writers. 
-            Markdown allows you to write using an easy-to-read, easy-to-write plain text format, 
-            then convert it to structurally valid XHTML (or HTML).
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.#ctor">
-            <summary>
-            Create a new Markdown instance using default options
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.#ctor(System.Boolean)">
-            <summary>
-            Create a new Markdown instance and optionally load options from a configuration
-            file. There they should be stored in the appSettings section, available options are:
-            
-                Markdown.StrictBoldItalic (true/false)
-                Markdown.EmptyElementSuffix (">" or " />" without the quotes)
-                Markdown.LinkEmails (true/false)
-                Markdown.AutoNewLines (true/false)
-                Markdown.AutoHyperlink (true/false)
-                Markdown.EncodeProblemUrlCharacters (true/false) 
-                
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.#ctor(MarkdownSharp.MarkdownOptions)">
-            <summary>
-            Create a new Markdown instance and set the options from the MarkdownOptions object.
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.Markdown.EmptyElementSuffix">
-            <summary>
-            use ">" for HTML output, or " />" for XHTML output
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.Markdown.LinkEmails">
-            <summary>
-            when false, email addresses will never be auto-linked  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.Markdown.StrictBoldItalic">
-            <summary>
-            when true, bold and italic require non-word characters on either side  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.Markdown.AutoNewLines">
-            <summary>
-            when true, RETURN becomes a literal newline  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.Markdown.AutoHyperlink">
-            <summary>
-            when true, (most) bare plain URLs are auto-hyperlinked  
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.Markdown.EncodeProblemUrlCharacters">
-            <summary>
-            when true, problematic URL characters like [, ], (, and so forth will be encoded 
-            WARNING: this is a significant deviation from the markdown spec
-            </summary>
-        </member>
-        <member name="F:MarkdownSharp.Markdown._nestDepth">
-            <summary>
-            maximum nested depth of [] and () supported by the transform; implementation detail
-            </summary>
-        </member>
-        <member name="F:MarkdownSharp.Markdown._tabWidth">
-            <summary>
-            Tabs are automatically converted to spaces as part of the transform  
-            this constant determines how "wide" those tabs become in spaces  
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.#cctor">
-            <summary>
-            In the static constuctor we'll initialize what stays the same across all transforms.
-            </summary>
-        </member>
-        <member name="P:MarkdownSharp.Markdown.Version">
-            <summary>
-            current version of MarkdownSharp;  
-            see http://code.google.com/p/markdownsharp/ for the latest code or to contribute
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.Transform(System.String)">
-            <summary>
-            Transforms the provided Markdown-formatted text to HTML;  
-            see http://en.wikipedia.org/wiki/Markdown
-            </summary>
-            <remarks>
-            The order in which other subs are called here is
-            essential. Link and image substitutions need to happen before
-            EscapeSpecialChars(), so that any *'s or _'s in the a
-            and img tags get encoded.
-            </remarks>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.RunBlockGamut(System.String,System.Boolean)">
-            <summary>
-            Perform transformations that form block-level tags like paragraphs, headers, and list items.
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.RunSpanGamut(System.String)">
-            <summary>
-            Perform transformations that occur *within* block-level tags like paragraphs, headers, and list items.
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.FormParagraphs(System.String,System.Boolean)">
-            <summary>
-            splits on two or more newlines, to form "paragraphs";    
-            each paragraph is then unhashed (if it is a hash and unhashing isn't turned off) or wrapped in HTML p tag
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.GetNestedBracketsPattern">
-            <summary>
-            Reusable pattern to match balanced [brackets]. See Friedl's 
-            "Mastering Regular Expressions", 2nd Ed., pp. 328-331.
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.GetNestedParensPattern">
-            <summary>
-            Reusable pattern to match balanced (parens). See Friedl's 
-            "Mastering Regular Expressions", 2nd Ed., pp. 328-331.
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.StripLinkDefinitions(System.String)">
-            <summary>
-            Strips link definitions from text, stores the URLs and titles in hash references.
-            </summary>
-            <remarks>
-            ^[id]: url "optional title"
-            </remarks>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.GetBlockPattern">
-            <summary>
-            derived pretty much verbatim from PHP Markdown
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.HashHTMLBlocks(System.String)">
-            <summary>
-            replaces any block-level HTML blocks with hash entries
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.TokenizeHTML(System.String)">
-            <summary>
-            returns an array of HTML tokens comprising the input string. Each token is 
-            either a tag (possibly with nested, tags contained therein, such 
-            as &lt;a href="&lt;MTFoo&gt;"&gt;, or a run of text between tags. Each element of the 
-            array is a two-element array; the first is either 'tag' or 'text'; the second is 
-            the actual value.
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoAnchors(System.String)">
-            <summary>
-            Turn Markdown link shortcuts into HTML anchor tags
-            </summary>
-            <remarks>
-            [link text](url "title") 
-            [link text][id] 
-            [id] 
-            </remarks>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoImages(System.String)">
-            <summary>
-            Turn Markdown image shortcuts into HTML img tags. 
-            </summary>
-            <remarks>
-            ![alt text][id]
-            ![alt text](url "optional title")
-            </remarks>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoHeaders(System.String)">
-            <summary>
-            Turn Markdown headers into HTML header tags
-            </summary>
-            <remarks>
-            Header 1  
-            ========  
-            
-            Header 2  
-            --------  
-            
-            # Header 1  
-            ## Header 2  
-            ## Header 2 with closing hashes ##  
-            ...  
-            ###### Header 6  
-            </remarks>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoHorizontalRules(System.String)">
-            <summary>
-            Turn Markdown horizontal rules into HTML hr tags
-            </summary>
-            <remarks>
-            ***  
-            * * *  
-            ---
-            - - -
-            </remarks>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoLists(System.String)">
-            <summary>
-            Turn Markdown lists into HTML ul and ol and li tags
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.ProcessListItems(System.String,System.String)">
-            <summary>
-            Process the contents of a single ordered or unordered list, splitting it
-            into individual list items.
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoCodeBlocks(System.String)">
-            <summary>
-            /// Turn Markdown 4-space indented code into HTML pre code blocks
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoCodeSpans(System.String)">
-            <summary>
-            Turn Markdown `code spans` into HTML code tags
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoItalicsAndBold(System.String)">
-            <summary>
-            Turn Markdown *italics* and **bold** into HTML strong and em tags
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoHardBreaks(System.String)">
-            <summary>
-            Turn markdown line breaks (two space at end of line) into HTML break tags
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoBlockQuotes(System.String)">
-            <summary>
-            Turn Markdown > quoted blocks into HTML blockquote blocks
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.DoAutoLinks(System.String)">
-            <summary>
-            Turn angle-delimited URLs into HTML anchor tags
-            </summary>
-            <remarks>
-            &lt;http://www.example.com&gt;
-            </remarks>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.Outdent(System.String)">
-            <summary>
-            Remove one level of line-leading spaces
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.EncodeEmailAddress(System.String)">
-            <summary>
-            encodes email address randomly  
-            roughly 10% raw, 45% hex, 45% dec 
-            note that @ is always encoded and : never is
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.EncodeCode(System.String)">
-            <summary>
-            Encode/escape certain Markdown characters inside code blocks and spans where they are literals
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.EncodeAmpsAndAngles(System.String)">
-            <summary>
-            Encode any ampersands (that aren't part of an HTML entity) and left or right angle brackets
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.EscapeBackslashes(System.String)">
-            <summary>
-            Encodes any escaped characters such as \`, \*, \[ etc
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.Unescape(System.String)">
-            <summary>
-            swap back in all the special characters we've hidden
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.EscapeBoldItalic(System.String)">
-            <summary>
-            escapes Bold [ * ] and Italic [ _ ] characters
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.EncodeProblemUrlChars(System.String)">
-            <summary>
-            hex-encodes some unusual "problem" chars in URLs to avoid URL detection problems 
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.EscapeSpecialCharsWithinTagAttributes(System.String)">
-            <summary>
-            Within tags -- meaning between &lt; and &gt; -- encode [\ ` * _] so they 
-            don't conflict with their use in Markdown for code, italics and strong. 
-            We're replacing each such character with its corresponding hash 
-            value; this is likely overkill, but it should prevent us from colliding 
-            with the escape values by accident.
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.Normalize(System.String)">
-            <summary>
-            convert all tabs to _tabWidth spaces; 
-            standardizes line endings from DOS (CR LF) or Mac (CR) to UNIX (LF); 
-            makes sure text ends with a couple of newlines; 
-            removes any blank lines (only spaces) in the text
-            </summary>
-        </member>
-        <member name="M:MarkdownSharp.Markdown.RepeatString(System.String,System.Int32)">
-            <summary>
-            this is to emulate what's evailable in PHP
             </summary>
         </member>
     </members>
