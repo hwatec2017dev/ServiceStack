@@ -10,6 +10,7 @@ using ServiceStack.Aws.DynamoDb;
 
 namespace ServiceStack.WebHost.Endpoints.Tests
 {
+    [NUnit.Framework.Ignore("DynamoDB")]
     public class AutoQueryDataDynamoTests : AutoQueryDataTests
     {
         public override ServiceStackHost CreateAppHost()
