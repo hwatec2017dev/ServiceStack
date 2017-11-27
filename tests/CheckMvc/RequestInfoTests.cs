@@ -14,7 +14,7 @@ namespace CheckMvc
 
     public partial class RequestInfoTests
     {
-        public string BaseUrl = "http://localhost:49435/api/v1/";
+        public string BaseUrl = "http://localhost:49435/api/";
 
         private RequestInfoResponse GetRequestInfoForPath(string path)
         {
