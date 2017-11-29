@@ -35,6 +35,7 @@ namespace ServiceStack.Configuration
             }
         }
 
+        public static readonly AppSettings Default = new AppSettings();
         /// <summary>
         /// The tier lets you specify a retrieving a setting with the tier prefix first before falling back to the original key. 
         /// E.g a tier of 'Live' looks for 'Live.{Key}' or if not found falls back to '{Key}'.
