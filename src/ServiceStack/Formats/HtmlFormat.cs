@@ -92,14 +92,18 @@ namespace ServiceStack.Formats
                 var json = JsonDataContractSerializer.Instance.SerializeToString(dto) ?? "null";
                 json = json.Replace("<", "&lt;").Replace(">", "&gt;");
 
-                var url = req.ResolveAbsoluteUrl()
-                    .Replace("format=html", "")
-                    .Replace("format=shtm", "")
-                    .TrimEnd('?', '&');
+                var url = req.ResolveAbsoluteUrl();
+                var index = url.IndexOf("?");
+                var formatUrl = index != -1 ? url.Substring(0, index + 1) : url + "?";
+                foreach (var key in req.QueryString.AllKeys)
+                {
+                    if (key == Keywords.Format)
+                        continue;
 
-                url += url.Contains("?") ? "&" : "?";
+                    formatUrl += (key.IsNullOrEmpty() ? "" : key + "=") + req.QueryString[key] + "&";
+                }
 
-                var now = DateTime.UtcNow;
+                var now = DateTime.Now;
                 var requestName = req.OperationName ?? dto.GetType().GetOperationName();
 
                 html = HtmlTemplates.GetHtmlFormatTemplate()
@@ -107,7 +111,8 @@ namespace ServiceStack.Formats
                     .Replace("${Title}", string.Format(TitleFormat, requestName, now))
                     .Replace("${MvcIncludes}", MiniProfiler.Profiler.RenderIncludes().ToString())
                     .Replace("${Header}", string.Format(HtmlTitleFormat, requestName, now))
-                    .Replace("${ServiceUrl}", url)
+                    .Replace("${ServiceUrl}", req.AbsoluteUri)
+                    .Replace("${FormatUrl}", formatUrl)
                     .Replace("${Humanize}", Humanize.ToString().ToLower());
             }
 

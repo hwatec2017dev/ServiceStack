@@ -832,18 +832,6 @@ namespace ServiceStack
                 httpReq.GetHeader(HttpHeaders.XForwardedProtocol) == "https";
         }
 
-        public static string NormalizeScheme(this string url, bool useHttps)
-        {
-            if (url == null || !useHttps)
-                return url;
-
-            url = url.TrimStart();
-            if (url.StartsWith("http://"))
-                return "https://" + url.Substring("http://".Length);
-
-            return url;
-        }
-
         public static RequestAttributes ToRequestAttributes(string[] attrNames)
         {
             var attrs = RequestAttributes.None;
