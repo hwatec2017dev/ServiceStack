@@ -5,13 +5,23 @@ using ServiceStack.Host.Handlers;
 
 namespace CheckHttpListener
 {
-    public class RequestInfoServices : Service
-    {
-    }
+    public class RequestInfoServices : Service { }
 
     public partial class RequestInfoTests
     {
         public string BaseUrl = "http://127.0.0.1:2222/";
+
+        private AppSelfHostBase appHost;
+
+        [OneTimeSetUp]
+        public void TestFixtureSetUp()
+        {
+            appHost = new AppSelfHost();
+            appHost.Init().Start(BaseUrl);
+        }
+
+        [OneTimeTearDown]
+        public void TestFixtureTearDown() => appHost.Stop();
 
         private RequestInfoResponse GetRequestInfoForPath(string path)
         {

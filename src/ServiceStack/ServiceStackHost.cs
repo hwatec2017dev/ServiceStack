@@ -319,7 +319,7 @@ namespace ServiceStack
         /// <param name="urlBase">Url to listen to</param>
         public virtual ServiceStackHost Start(string urlBase)
         {
-            throw new NotImplementedException("Start(listeningAtUrlBase) is not supported by this AppHost");
+            throw new NotImplementedException($"The current method is not supported by this AppHost - {GetType().FullName}.");
         }
 
         public string ServiceName { get; set; }
