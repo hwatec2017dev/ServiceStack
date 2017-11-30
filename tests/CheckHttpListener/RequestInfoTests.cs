@@ -17,7 +17,8 @@ namespace CheckHttpListener
         public void TestFixtureSetUp()
         {
             appHost = new AppSelfHost();
-            appHost.Init().Start(BaseUrl);
+            appHost.Init();
+            appHost.Start(BaseUrl);
         }
 
         [OneTimeTearDown]

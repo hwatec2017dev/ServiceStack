@@ -8,9 +8,7 @@ namespace ServiceStack.Server.Tests.Auth
 #if NETCORE_SUPPORT
     [Ignore("Not working on .NET Core")]
 #endif
-    public class OrmLiteStatelessAuthRazorTests : StatelessAuthRazorTests
-    {
-    }
+    public class OrmLiteStatelessAuthRazorTests : StatelessAuthRazorTests { }
 
     public abstract class StatelessAuthRazorTests
     {
