@@ -151,7 +151,6 @@
     <Content Include="user-default.htm" />
     <Content Include="Global.asax" />
     <Content Include="Soap11WebService.asmx" />
-    <Content Include="_default.html" />
     <Content Include="TestExistingDir\default.html" />
     <Content Include="TestExistingDir\upload.html" />
     <Content Include="Web.config">

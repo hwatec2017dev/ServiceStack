@@ -106,7 +106,8 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 
             Assert.That(html.StartsWith("<!doctype html>"));
             Assert.That(html.Contains("# Maria Anders Customer Details (Berlin, Germany)"));
-            Assert.That(html.Contains("Customer Orders Total:  $4,596.20"));
+            4596.20.ToString("C").Print();
+            Assert.That(html.Contains($"Customer Orders Total:  {4596.20.ToString("C")}"));
         }
 
         [Test]
