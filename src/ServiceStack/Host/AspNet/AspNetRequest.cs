@@ -66,6 +66,7 @@ namespace ServiceStack.Host.AspNet
 
             this.PathInfo = this.OriginalPathInfo = GetPathInfo();
             this.PathInfo = HostContext.AppHost.ResolvePathInfo(this, OriginalPathInfo);
+            httpContext.Items[Keywords.IRequest] = this;
         }
 
         public HttpRequestBase HttpRequest => request;

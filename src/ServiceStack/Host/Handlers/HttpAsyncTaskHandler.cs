@@ -139,7 +139,7 @@ namespace ServiceStack.Host.Handlers
 
             if (DefaultHandledRequest(context)) return TypeConstants.EmptyTask;
 
-            var httpReq = new ServiceStack.Host.AspNet.AspNetRequest(context, operationName);
+            var httpReq = (ServiceStack.Host.AspNet.AspNetRequest)context.Items[Keywords.IRequest] ?? new ServiceStack.Host.AspNet.AspNetRequest(context, operationName);
 
             if (RunAsAsync())
                 return ProcessRequestAsync(httpReq, httpReq.Response, operationName);
