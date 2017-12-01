@@ -196,7 +196,7 @@ namespace ServiceStack.WebHost.IntegrationTests
                     }));
 
                 Plugins.Add(new RegistrationFeature());
-
+                ServiceStack.Auth.RegisterService.AllowUpdates = true;
                 container.Register<IAuthRepository>(c =>
                     new OrmLiteAuthRepository(c.Resolve<IDbConnectionFactory>()));
 

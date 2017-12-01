@@ -84,12 +84,14 @@ namespace ServiceStack.Common.Tests.OAuth
         public void TestFixtureSetUp()
         {
             appHost = new BasicAppHost().Init();
+            RegisterService.AllowUpdates = true;
         }
 
         [OneTimeTearDown]
         public void TestFixtureTearDown()
         {
             appHost.Dispose();
+            RegisterService.AllowUpdates = false;
         }
 
         public abstract IUserAuthRepository CreateAuthRepo();
