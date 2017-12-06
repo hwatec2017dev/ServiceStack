@@ -113,7 +113,7 @@ namespace ServiceStack
             }
 
             appHost.GetPlugin<MetadataFeature>()
-                .AddDebugLink(AtRestPath, "Request Logs");
+                ?.AddDebugLink(AtRestPath.TrimStart('/'), "Request Logs");
         }
     }
 }
