@@ -80,7 +80,7 @@ namespace ServiceStack
 
         protected ServiceStackHost(string serviceName, params Assembly[] assembliesWithServices)
         {
-            this.StartedAt = DateTime.UtcNow;
+            this.StartedAt = DateTime.Now;
 
             ServiceName = serviceName;
             AppSettings = new AppSettings();
@@ -567,7 +567,7 @@ namespace ServiceStack
         //After configure called
         public virtual void OnAfterInit()
         {
-            AfterInitAt = DateTime.UtcNow;
+            AfterInitAt = DateTime.Now;
 
             if (config.EnableFeatures != Feature.All)
             {
