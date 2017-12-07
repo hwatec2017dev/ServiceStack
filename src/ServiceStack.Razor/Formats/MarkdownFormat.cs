@@ -96,9 +96,6 @@ namespace ServiceStack.Formats
             foreach (var ns in appHost.Config.RazorNamespaces)
                 Evaluator.AddAssembly(ns);
 
-            this.MarkdownBaseType = this.MarkdownBaseType;
-            this.MarkdownGlobalHelpers = this.MarkdownGlobalHelpers;
-
             this.ReplaceTokens = appHost.Config.HtmlReplaceTokens ?? new Dictionary<string, string>();
             var webHostUrl = appHost.Config.WebHostUrl;
             if (!webHostUrl.IsNullOrEmpty())

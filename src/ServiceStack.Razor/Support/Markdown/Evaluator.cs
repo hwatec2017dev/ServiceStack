@@ -48,6 +48,7 @@ namespace ServiceStack.Support.Markdown
 		private IDictionary<string, Type> TypeProperties { get; set; }
 
         public static readonly List<Assembly> Assemblies = new List<Assembly> {
+            typeof(Evaluator).Assembly,    //"ServiceStack.Razor.dll",
             typeof(string).Assembly,       //"system.dll",
 //			typeof(XmlDocument).Assembly,  //"system.xml.dll",
             typeof(System.Web.HtmlString).Assembly, //"system.web.dll",
@@ -330,7 +331,7 @@ namespace CSharpEval
 				{
 					error.AppendFormat("{0}\n", err.ErrorText);
 				}
-				throw new Exception("Error Compiling Expression: " + StringBuilderCache.ReturnAndFree(error));
+				throw new Exception(StringBuilderCache.ReturnAndFree(error));
 			}
 
 			compiledAssembly = compilerResults.CompiledAssembly;
