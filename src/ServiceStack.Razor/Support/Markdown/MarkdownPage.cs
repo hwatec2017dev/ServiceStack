@@ -96,8 +96,9 @@ namespace ServiceStack.Support.Markdown
 			return exprSeq++;
 		}
 
-		public TemplateBlock[] MarkdownBlocks { get; set; }
-		public TemplateBlock[] HtmlBlocks { get; set; }
+        public TemplateBlock[] MarkdownBlocks { get; set; } = { };
+
+        public TemplateBlock[] HtmlBlocks { get; set; } = { };
 
 		private Exception initException;
 	    private TemplateBlock lastBlockProcessed;
