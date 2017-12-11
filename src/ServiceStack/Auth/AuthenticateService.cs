@@ -79,7 +79,7 @@ namespace ServiceStack.Auth
             {
                 foreach (var authProvider in AuthProviders)
                 {
-                    if (authProvider is IUserSessionSource sessionSource)
+                    if (authProvider is IUserSessionSource sessionSource) //don't remove
                         return sessionSource;
                 }
             }
@@ -109,6 +109,17 @@ namespace ServiceStack.Auth
             }
 
             return null;
+        }
+
+        public static JwtAuthProviderReader GetJwtAuthProvider() => GetAuthProvider(JwtAuthProviderReader.Name) as JwtAuthProviderReader;
+
+        public static JwtAuthProviderReader GetRequiredJwtAuthProvider()
+        {
+            var jwtProvider = GetJwtAuthProvider();
+            if (jwtProvider == null)
+                throw new NotSupportedException("JwtAuthProvider is required but was not registered in AuthFeature's AuthProviders");
+
+            return jwtProvider;
         }
 
         public static void Init(Func<IAuthSession> sessionFactory, params IAuthProvider[] authProviders)
@@ -170,8 +181,7 @@ namespace ServiceStack.Auth
             if (LogoutAction.EqualsIgnoreCase(request.provider))
                 return authProvider.Logout(this, request);
 
-            var authWithRequest = authProvider as IAuthWithRequest;
-            if (authWithRequest != null && !base.Request.IsInProcessRequest())
+            if (authProvider is IAuthWithRequest && !base.Request.IsInProcessRequest())
             {
                 //IAuthWithRequest normally doesn't call Authenticate directly, but they can to return Auth Info
                 //But as AuthenticateService doesn't have [Authenticate] we need to call it manually
