@@ -967,7 +967,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                 if (ex.StatusCode == (int)HttpStatusCode.Found)
                     return;
 #endif
-                throw;
+                throw ex;
             } 
 
             var locationUri = new Uri(lastResponseLocationHeader);
@@ -997,7 +997,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                 if (ex.StatusCode == (int)HttpStatusCode.Found)
                     return;
 #endif
-                throw;
+                throw ex;
             }
 
             var locationUri = new Uri(lastResponseLocationHeader);
@@ -1038,7 +1038,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                 if (ex.StatusCode == (int)HttpStatusCode.Found)
                     return;
 #endif
-                throw;
+                throw ex;
             }
 
             var locationUri = new Uri(lastResponseLocationHeader);
@@ -1080,7 +1080,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                 if (ex.StatusCode == (int)HttpStatusCode.Redirect)
                     return;
 #endif
-                throw;
+                throw ex;
             }
 
             Assert.That(lastResponseLocationHeader, Is.EqualTo(SessionRedirectUrl));

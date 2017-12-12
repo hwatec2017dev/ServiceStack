@@ -25,7 +25,7 @@ namespace ServiceStack.WebHost.IntegrationTests.Services
 
 	public class StatusCodeService : Service, IRequiresRequest
 	{
-		new public IRequest RequestContext { get; set; }
+		public IRequest RequestContext { get; set; }
 
         public object Any(RequestFilter request)
 		{

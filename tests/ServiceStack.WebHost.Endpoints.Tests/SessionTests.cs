@@ -102,7 +102,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                     AllowSessionIdsInHttpParams = true,
                 });
 
-                const bool UseOrmLiteCache = false;
+                bool UseOrmLiteCache = false;
                 if (UseOrmLiteCache)
                 {
                     container.Register<IDbConnectionFactory>(c =>

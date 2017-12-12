@@ -150,8 +150,8 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CheckWeb.dtos.cs" />
-    <Compile Include="CheckWebGlobalNamespace.dtos.cs" />
+    <None Include="CheckWeb.dtos.cs" />
+    <None Include="CheckWebGlobalNamespace.dtos.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="RequestInfoTests.cs" />
     <Compile Include="TestGlobalNamespace.dtos.cs" />
@@ -168,7 +168,9 @@
     <Content Include="Global.asax" />
     <Content Include="TypeScript.dtos.d.ts" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -180,9 +182,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.Api.OpenApi\ServiceStack.Api.OpenApi.csproj">
@@ -239,7 +238,9 @@
     <Content Include="MRootPage.md" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="TypeScript.dtos.ts" />

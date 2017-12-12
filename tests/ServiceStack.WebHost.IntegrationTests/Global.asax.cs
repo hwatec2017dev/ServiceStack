@@ -33,7 +33,7 @@ namespace ServiceStack.WebHost.IntegrationTests
 {
     public class Global : System.Web.HttpApplication
     {
-        private const bool StartMqHost = false;
+        private static bool StartMqHost = false;
 
         public class AppHost
             : AppHostBase
