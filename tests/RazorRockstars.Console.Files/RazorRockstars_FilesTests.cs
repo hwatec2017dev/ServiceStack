@@ -164,7 +164,7 @@ namespace RazorRockstars.Console.Files
         static string ViewRockstarsMark = "<!--view:RockstarsMark.md-->";
         static string ViewNoModelNoController = "<!--view:NoModelNoController.cshtml-->";
         static string ViewTypedModelNoController = "<!--view:TypedModelNoController.cshtml-->";
-        static string ViewCachedAllReqstars = "<!--view:CachedAllReqstars.cshtml-->";
+        //static string ViewCachedAllReqstars = "<!--view:CachedAllReqstars.cshtml-->";
         static string ViewIList = "<!--view:IList.cshtml-->";
         static string ViewList = "<!--view:List.cshtml-->";
         static string ViewPage1 = "<!--view:Page1.cshtml-->";

@@ -89,6 +89,7 @@ namespace ServiceStack.Server.Tests.Caching
         }
     }
 
+    [NUnit.Framework.Ignore("SqlServer")]
     public class SqlServer2014MemoryOptimizedOrmLiteCacheClientTests : CacheClientTestsBase
     {
         public override ICacheClient CreateClient()
@@ -125,6 +126,7 @@ namespace ServiceStack.Server.Tests.Caching
         public DateTime ModifiedDate { get; set; }
     }
 
+    [NUnit.Framework.Ignore("SqlServer")]
     public class SqlServer2016MemoryOptimizedOrmLiteCacheClientTests : CacheClientTestsBase
     {
         public override ICacheClient CreateClient()
