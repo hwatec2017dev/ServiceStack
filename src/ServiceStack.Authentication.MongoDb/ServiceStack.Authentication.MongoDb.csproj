@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Bson.signed" Version="2.4.4" />
-    <PackageReference Include="MongoDB.Driver.Signed" Version="2.4.4" />
+    <PackageReference Include="MongoDB.Driver.signed" Version="2.4.4" />
     <PackageReference Include="MongoDB.Driver.Core.signed" Version="2.4.4" />
   </ItemGroup>
 
@@ -33,8 +33,6 @@
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <DefineConstants>$(DefineConstants);</DefineConstants>
-    <SignAssembly>True</SignAssembly>
     <DefineConstants>$(DefineConstants);</DefineConstants>
     <SignAssembly>True</SignAssembly>
     <DelaySign>false</DelaySign>
