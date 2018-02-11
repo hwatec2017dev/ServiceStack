@@ -305,6 +305,13 @@ namespace CheckWeb
 
             Plugins.Add(new OpenApiFeature
             {
+                ApiDeclarationFilter = api =>
+                {
+                    foreach (var path in new[] {api.Paths["/auth"], api.Paths["/auth/{provider}"]})
+                    {
+                        path.Get = path.Put = path.Delete = null;
+                    }
+                },
                 Tags =
                 {
                     new OpenApiTag
@@ -444,6 +451,64 @@ namespace CheckWeb
 
         [AddHeader(ContentType = MimeTypes.PlainText)]
         public object Any(ReturnText request) => request.Text;
+    }
+
+    [Route("/plain-dto")]
+    public class PlainDto : IReturn<PlainDto>
+    {
+        public string Name { get; set; }
+    }
+
+    [Route("/httpresult-dto")]
+    public class HttpResultDto : IReturn<HttpResultDto>
+    {
+        public string Name { get; set; }
+    }
+
+    public class HttpResultServices : Service
+    {
+        public object Any(PlainDto request) => request;
+
+        public object Any(HttpResultDto request) => new HttpResult(request, HttpStatusCode.Created);
+    }
+
+    [Route("/restrict/mq")]
+    [Restrict(RequestAttributes.MessageQueue)]
+    public class TestMqRestriction : IReturn<TestMqRestriction>
+    {
+        public string Name { get; set; }
+    }
+
+    public class TestRestrictionsService : Service
+    {
+        public object Any(TestMqRestriction request) => request;
+    }
+
+    [Route("/set-cache")]
+    public class SetCache : IReturn<SetCache>
+    {
+        public string ETag { get; set; }
+        public TimeSpan? Age { get; set; }
+        public TimeSpan? MaxAge { get; set; }
+        public DateTime? Expires { get; set; }
+        public DateTime? LastModified { get; set; }
+        public CacheControl? CacheControl { get; set; }
+    }
+
+    public class CacheEtagServices : Service
+    {
+        public object Any(SetCache request)
+        {
+            return new HttpResult(request)
+            {
+                Age = request.Age,
+                ETag = request.ETag,
+                MaxAge = request.MaxAge,
+                Expires = request.Expires,
+                LastModified = request.LastModified,
+                CacheControl = request.CacheControl.GetValueOrDefault(CacheControl.None),
+            };
+        }
     }
 
     public class Global : System.Web.HttpApplication

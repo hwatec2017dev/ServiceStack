@@ -2083,12 +2083,28 @@
             set the specified selectExpression.
             </summary>
             <param name='selectExpression'>
-            raw Select expression: "Select SomeField1, SomeField2 from SomeTable"
+            raw Select expression: "SomeField1, SomeField2 from SomeTable"
+            </param>
+        </member>
+        <member name="M:ServiceStack.OrmLite.SqlExpression`1.SelectDistinct(System.String)">
+            <summary>
+            set the specified DISTINCT selectExpression.
+            </summary>
+            <param name='selectExpression'>
+            raw Select expression: "SomeField1, SomeField2 from SomeTable"
             </param>
         </member>
         <member name="M:ServiceStack.OrmLite.SqlExpression`1.Select(System.String[])">
             <summary>
             Set the specified selectExpression using matching fields.
+            </summary>
+            <param name='fields'>
+            Matching Fields: "SomeField1, SomeField2"
+            </param>
+        </member>
+        <member name="M:ServiceStack.OrmLite.SqlExpression`1.SelectDistinct(System.String[])">
+            <summary>
+            Set the specified DISTINCT selectExpression using matching fields.
             </summary>
             <param name='fields'>
             Matching Fields: "SomeField1, SomeField2"

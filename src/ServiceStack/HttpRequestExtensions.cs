@@ -15,7 +15,6 @@ using ServiceStack.Logging;
 using ServiceStack.Text;
 using ServiceStack.Validation;
 using ServiceStack.Web;
-using static System.String;
 
 #if !NETSTANDARD2_0
 using ServiceStack.Host.AspNet;
@@ -60,7 +59,7 @@ namespace ServiceStack
 
             //IIS will assign null to params without a name: .../?some_value can be retrieved as req.Params[null]
             //TryGetValue is not happy with null dictionary keys, so we should bail out here
-            if (IsNullOrEmpty(name)) return null;
+            if (string.IsNullOrEmpty(name)) return null;
 
             if (httpReq.Cookies.TryGetValue(name, out var cookie)) return cookie.Value;
 
@@ -96,7 +95,7 @@ namespace ServiceStack
 
             int pos;
 
-            if (resolvedPathInfo == Empty)
+            if (resolvedPathInfo == string.Empty)
             {
                 pos = httpReq.AbsoluteUri.IndexOf('?');
                 if (pos == -1)
@@ -149,7 +148,7 @@ namespace ServiceStack
                 return null;
 
             var path = request.PathInfo;
-            return IsNullOrEmpty(path) || path[path.Length - 1] == '/'
+            return string.IsNullOrEmpty(path) || path[path.Length - 1] == '/'
                 ? path
                 : path.Substring(0, path.LastIndexOf('/') + 1);
         }
@@ -353,7 +352,7 @@ namespace ServiceStack
 
         public static string GetOperationNameFromLastPathInfo(string lastPathInfo)
         {
-            if (IsNullOrEmpty(lastPathInfo)) return null;
+            if (string.IsNullOrEmpty(lastPathInfo)) return null;
 
             var operationName = lastPathInfo.Substring("/".Length);
 
@@ -467,12 +466,12 @@ namespace ServiceStack
         public static string GetPathInfo(string fullPath, string mode, string appPath)
         {
             var pathInfo = ResolvePathInfoFromMappedPath(fullPath, mode);
-            if (!IsNullOrEmpty(pathInfo)) 
+            if (!string.IsNullOrEmpty(pathInfo)) 
                 return pathInfo;
 
             //Wildcard mode relies on this to work out the handlerPath
             pathInfo = ResolvePathInfoFromMappedPath(fullPath, appPath);
-            if (!IsNullOrEmpty(pathInfo)) 
+            if (!string.IsNullOrEmpty(pathInfo)) 
                 return pathInfo;
 
             return fullPath;
@@ -607,7 +606,7 @@ namespace ServiceStack
         public static string GetQueryStringContentType(this IRequest httpReq)
         {
             var callback = httpReq.QueryString[Keywords.Callback];
-            if (!IsNullOrEmpty(callback)) return MimeTypes.Json;
+            if (!string.IsNullOrEmpty(callback)) return MimeTypes.Json;
 
             var format = httpReq.QueryString[Keywords.Format];
             if (format == null)
@@ -680,7 +679,7 @@ namespace ServiceStack
         public static string GetResponseContentType(this IRequest httpReq)
         {
             var specifiedContentType = GetQueryStringContentType(httpReq);
-            if (!IsNullOrEmpty(specifiedContentType)) return specifiedContentType;
+            if (!string.IsNullOrEmpty(specifiedContentType)) return specifiedContentType;
 
             var acceptContentTypes = httpReq.AcceptTypes;
             var defaultContentType = httpReq.ContentType;
@@ -693,7 +692,7 @@ namespace ServiceStack
             var preferredContentTypes = HostContext.Config.PreferredContentTypesArray;
 
             var acceptsAnything = false;
-            var hasDefaultContentType = !IsNullOrEmpty(defaultContentType);
+            var hasDefaultContentType = !string.IsNullOrEmpty(defaultContentType);
             if (acceptContentTypes != null)
             {
                 var hasPreferredContentTypes = new bool[preferredContentTypes.Length];
@@ -784,10 +783,19 @@ namespace ServiceStack
 
         public static string GetRawUrl(this IRequest httpReq)
         {
-            var handlerPath = HostContext.Config.HandlerFactoryPath;
-            return handlerPath != null
-                ? httpReq.RawUrl.IndexOf(handlerPath, StringComparison.OrdinalIgnoreCase) == 1 ? httpReq.RawUrl.Substring(1 + handlerPath.Length) : httpReq.RawUrl
+            var appPath = HostContext.Config.HandlerFactoryPath;
+#if !NETSTANDARD2_0
+            if (httpReq.OriginalRequest is HttpRequestBase aspReq && aspReq.ApplicationPath?.Length > 1)
+                appPath = aspReq.ApplicationPath.CombineWith(appPath);
+#endif
+            var pos = appPath != null
+                ? httpReq.RawUrl.IndexOf(appPath, StringComparison.OrdinalIgnoreCase)
+                : -1;
+            var rawUrl = pos >= 0
+                ? httpReq.RawUrl.Substring(pos + appPath.Length) 
                 : httpReq.RawUrl;
+
+            return rawUrl;
         }
 
         public static string GetAbsoluteUrl(this IRequest httpReq, string url)
@@ -801,7 +809,7 @@ namespace ServiceStack
 
         public static string InferBaseUrl(this string absoluteUri, string fromPathInfo = null)
         {
-            if (IsNullOrEmpty(fromPathInfo))
+            if (string.IsNullOrEmpty(fromPathInfo))
             {
                 fromPathInfo = "/" + (HostContext.Config.HandlerFactoryPath ?? "");
             }
@@ -812,7 +820,7 @@ namespace ServiceStack
                     return null;
             }
 
-            if (IsNullOrEmpty(absoluteUri))
+            if (string.IsNullOrEmpty(absoluteUri))
                 return null;
 
             var pos = absoluteUri.IndexOf(fromPathInfo, "https://".Length + 1, StringComparison.Ordinal);
@@ -1032,10 +1040,7 @@ namespace ServiceStack
 
         public static void SetAutoBatchCompletedHeader(this IRequest req, int completed)
         {
-            if (req == null || req.Response == null)
-                return;
-
-            req.Response.AddHeader(HttpHeaders.XAutoBatchCompleted, completed.ToString());
+            req?.Response?.AddHeader(HttpHeaders.XAutoBatchCompleted, completed.ToString());
         }
 
         public static void SetRoute(this IRequest req, RestPath route)
@@ -1045,8 +1050,7 @@ namespace ServiceStack
 
         public static RestPath GetRoute(this IRequest req)
         {
-            object route;
-            req.Items.TryGetValue(Keywords.Route, out route);
+            req.Items.TryGetValue(Keywords.Route, out var route);
             return route as RestPath;
         }
 
