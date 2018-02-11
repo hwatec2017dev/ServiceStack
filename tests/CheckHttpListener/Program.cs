@@ -61,7 +61,7 @@ namespace CheckHttpListener
 
             SetConfig(new HostConfig
             {
-                HandlerFactoryPath = "api",
+                //HandlerFactoryPath = "api",
                 CompressFilesWithExtensions = { "html", "js" },
                 DebugMode = true
             });
